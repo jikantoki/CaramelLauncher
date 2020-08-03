@@ -1,0 +1,72 @@
+#!/bin/bash
+aptcom="apt-get install -y "
+snacom="snap install "
+app=$(zenity --list --title="アプリを選んでください(fastinstall)" --text="どのアプリケーションを追加しますか？" --width=400 --height=400 --window-icon="/usr/Caramel/logo/logow.png" --column="名前" "Firefox" "ブラウザ" "LibreOffice" "オフィスソフト" "Spotify" "音楽再生ソフト" "gufw" "アンチウイルス" "Java実行環境 (jdk)" "Javaの実行と開発の環境" "gimp" "画像編集ソフト" "shotcut" "動画編集ソフト" "dropbox" "クラウドストレージ" "Virtualbox" "仮想マシン" "Wine" "Windows用ソフトウェアの起動" --column="説明" )
+if [ "x$?" = "x0" ];then
+	if [ "x$app" = "xFirefox" ];then
+		com="$aptcom""firefox"
+	elif [ "x$app" = "xLibreOffice" ];then
+		com="$aptcom""libreoffice"
+	elif [ "x$app" = "xSpotify" ];then
+		com="$snacom""spotify"
+	elif [ "x$app" = "xgufw" ];then
+		com="$aptcom""gufw"
+	elif [ "x$app" = "xJava実行環境 (jdk)" ];then
+		com="$aptcom""openjdk-8-jdk"
+	elif [ "x$app" = "xgimp" ];then
+		com="$aptcom""gimp"
+	elif [ "x$app" = "xshotcut" ];then
+		com="$aptcom""shotcut"
+	elif [ "x$app" = "xdropbox" ];then
+		com="$aptcom""dropbox thunar-dropbox-plugin"
+	elif [ "x$app" = "xVirtualbox" ];then
+		com="$aptcom""virtualbox"
+	elif [ "x$app" = "xWine" ];then
+		com="$aptcom""wine64 winetricks"
+	fi
+	echo "実行予定:$com"
+	zenity --warning --title="重要" --window-icon="/usr/Caramel/logo/logow.png" --width=430 --text="インストールを実行します。
+途中でキャンセルすると、その後の処理にエラーが出る場合があります。
+余程の事がない限りは、中断しないでください。
+インストールの実行には、インターネット接続が必要です。"
+	if [ "x$?" = "x0" ];then #罰を押したらキャンセルできる
+		ping -c 2 caramelos.xyz
+		if [ "x$?" = "x0" ];then
+			(
+			echo "5" ; sleep 1
+			pass=$(zenity --password --window-icon="/usr/Caramel/logo/logow.png" --title="認証が必要です" --text="ユーザーのパスワードを入力してください。")
+			echo "10" ; sleep 1
+			while :
+			do
+				echo "# 最新版のパッケージを探しています…"
+				hoge=$(echo $pass | sudo -S apt-get update)
+				echo "実行しました";sleep 5
+				test=$?
+				if [ "x$test" = "x1" ];then
+					pass=$(zenity --password --window-icon="/usr/Caramel/logo/logow.png" --title="パスワードが違います" --text="ユーザーのパスワードを入力してください。")
+				else
+					break
+				fi
+			done
+			echo "50"
+			echo "# インストールを実行しています…"
+			hoge=$(echo $pass | sudo -S $com)
+			echo "90"
+			echo "# もうしばらくお待ちください…"
+			notify-send -u critical "Fast install" "インストールが完了しました";sleep 1
+			echo "100"
+			sleep 1
+			)| 
+			instart=$(zenity --window-icon="/usr/Caramel/logo/logow.png" --progress --width=450 --auto-close --time-remaining --title="インストール実行中" --text="最新版のパッケージを探しています…");
+			if [ "x$?" = "x0" ];then
+				zenity --info --width=300 --window-icon="/usr/Caramel/logo/logow.png" --title="完了" --text="インストールが完了しました。"
+			else
+				zenity --warning --width=300 --window-icon="/usr/Caramel/logo/logow.png" --title="中断" --text="インストールが中断されました。"
+			fi
+		else
+			zenity --warning --width=300 --window-icon="/usr/Caramel/logo/logow.png" --title="オフライン" --text="ネットワークにアクセスできません。"
+		fi
+	fi
+else
+	zenity --info --width=300 --window-icon="/usr/Caramel/logo/logow.png" --title="キャンセル(fastinstall)" --text="インストールがキャンセルされました。"
+fi

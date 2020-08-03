@@ -1,0 +1,4 @@
+#!/bin/bash
+zenity --text-info --window-icon="/usr/Caramel/logo/logow.png" --title="このOSについて" --html --filename="/usr/Caramel/info.html" --width=500 --height=450
+
+

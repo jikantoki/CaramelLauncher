@@ -1,0 +1,20 @@
+#!/bin/bash
+nextv=$(</usr/Caramel/system/nextversionis)
+echo "Next Version is $nextv"
+url=$(printf "https://repo.caramelos.xyz/update/caramel/%d.zip" $nextv)
+echo "Access to $url"
+
+status=`curl -sS -w '%{http_code}\n' "$url" -o /dev/null`
+echo "HTTP status code is $status"
+if [ $status -gt 399 ];then
+	echo "File not found!"
+	exit 0
+fi
+echo "File found!"
+zenity --question --text="新しいアップデートがあります！
+今すぐアップデートしますか？" --title="Caramel OSのアップデート" --width=300
+if [ "x$?" = "x0" ];then
+	/bin/Caramel/update
+	exit 0
+fi
+exit 1

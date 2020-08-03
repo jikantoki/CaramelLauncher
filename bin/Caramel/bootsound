@@ -1,0 +1,25 @@
+#!/bin/bash
+doing=$(zenity --info --title="起動音の変更" --text="コンピュータの起動音を変更することができます。
+変更する場合は、oggファイルを選択してください。" --ok-label="終了" --extra-button="変更" --extra-button="起動音をオフにする" --extra-button="デフォルトに戻す" --width=350)
+todo=$?
+if [ "x$todo" = "x0" ];then
+	exit
+elif [ "x$doing" = "x変更" ];then
+	path=$(zenity --file-selection --file-filter=*.ogg)
+	ans=$?
+	if [ "x$ans" = "x0" ];then
+		echo $path
+		rm /usr/Caramel/bootsound/default.ogg
+		cp $path /usr/Caramel/bootsound/default.ogg
+		zenity --info --title="完了" --text="起動音の変更が完了しました。" --width=350
+	else
+		zenity --info --title="info" --text="起動音の変更がキャンセルされました。" --width=350
+	fi
+elif [ "x$doing" = "x起動音をオフにする" ];then
+	rm /usr/Caramel/bootsound/default.ogg
+	zenity --info --title="info" --text="起動音をオフにしました。" --width=350
+elif [ "x$doing" = "xデフォルトに戻す" ];then
+	rm /usr/Caramel/bootsound/default.ogg
+	cp /usr/Caramel/sound/NEW_NEW_boot5.ogg /usr/Caramel/bootsound/default.ogg
+	zenity --info --title="完了" --text="起動音の変更が完了しました。" --width=350
+fi

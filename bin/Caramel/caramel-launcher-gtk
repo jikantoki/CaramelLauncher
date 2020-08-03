@@ -1,0 +1,66 @@
+#!/bin/bash
+#Zenityでランチャーを制作
+while true 
+do
+	do=$(zenity --info --title="Caramel Launcher" --width=400 --window-icon="/usr/Caramel/logo/logow.png" --text="Caramel OSへようこそ！
+何をしたいですか？" --ok-label="システムの更新" --extra-button="アプリの追加" --extra-button="開発者のサイトを見る" --extra-button="ときえのきの曲を聞く" --extra-button="設定" --extra-button="終了")
+	if [ "x$do" = "x終了" ];then
+		end=$(zenity --question --width=250 --window-icon="/usr/Caramel/logo/logow.png" --title="確認" --text="終了してもよろしいですか？" )
+		if [ "x$?" = "x0" ];then #0で終了
+			echo "終了します"
+			exit 0
+		fi
+	elif [ "x$do" = "x開発者のサイトを見る" ];then
+		xdg-open https://blog.caramelos.xyz/
+		sleep 2
+		zenity --info --title="実行しました" --window-icon="/usr/Caramel/logo/logow.png" --width=430 --text="https://caramelos.xyzにアクセスしました。"
+	elif [ "x$do" = "xときえのきの曲を聞く" ];then
+		music=$(zenity --list --title="曲を選んでください" --text="どの曲を聞きたいですか？" --width=400 --height=400 --window-icon="/usr/Caramel/logo/logow.png" --column="リスト" "Caramel OS公式テーマソング" "Serene Linux公式テーマソング" "Freedom" "Polaris" "心の叫び ft.初音ミク" "心の叫び ft.健音テイ" "進むべきカタチ" "人生ゲームネット廃人編 ft.初音ミク" "人生ゲームネット廃人編 ft.健音テイ" "more...")
+		if [ "x$?" = "x0" ];then
+			musicerr=0
+			if [ "x$music" = "xFreedom" ];then
+				xdg-open ~/Music/ときえのき/freedom_初音ミク.mp3
+			elif [ "x$music" = "xPolaris" ];then
+				xdg-open ~/Music/ときえのき/Polaris_重音テト.mp3
+			elif [ "x$music" = "x心の叫び ft.初音ミク" ];then
+				xdg-open ~/Music/ときえのき/心の叫び_初音ミク.mp3
+			elif [ "x$music" = "x心の叫び ft.健音テイ" ];then
+				xdg-open ~/Music/ときえのき/心の叫び_健音テイ.mp3
+			elif [ "x$music" = "x進むべきカタチ" ];then
+				xdg-open ~/Music/ときえのき/進むべきカタチ_初音ミク.mp3
+			elif [ "x$music" = "x人生ゲームネット廃人編 ft.初音ミク" ];then
+				xdg-open ~/Music/ときえのき/人生ゲームネット廃人編_初音ミク.mp3
+			elif [ "x$music" = "x人生ゲームネット廃人編 ft.健音テイ" ];then
+				xdg-open ~/Music/ときえのき/人生ゲームネット廃人編_健音テイ.mp3
+			elif [ "x$music" = "xCaramel OS公式テーマソング" ];then
+				xdg-open ~/Music/ときえのき/NETNEET_初音ミク.mp3
+			elif [ "x$music" = "xSerene Linux公式テーマソング" ];then
+				xdg-open ~/Music/ときえのき/Serene_my_life_初音ミク.mp3
+			elif [ "x$music" = "xmore..." ];then
+				xdg-open ~/Music/ときえのき/
+			else
+				musicerr=1
+			fi
+			if [ "x$musicerr" = "x0" ];then
+				if [ "x$music" = "xmore..." ];then
+					echo "more!"
+				else
+					notify-send -u critical "Caramel Launcher" "$musicを再生しています"
+				fi
+			fi
+		fi
+	elif [ "x$do" = "xアプリの追加" ];then
+		/bin/Caramel/fastinstall
+	elif [ "x$do" = "x設定" ];then
+		nedo=$(zenity --info --title="Caramel OSの設定" --width=400 --window-icon="/usr/Caramel/logo/logow.png" --text="オプションを選んでください。" --ok-label="起動音の変更" --extra-button="このOSについて" --extra-button="戻る")
+		nextdo=$?
+		if [ "x$nextdo" = "x0" ];then
+			/bin/Caramel/bootsound
+		elif [ "x$nedo" = "xこのOSについて" ];then
+			/bin/Caramel/infome-gtk
+		fi
+	else
+		/bin/Caramel/update
+	fi
+	echo リターン！
+done

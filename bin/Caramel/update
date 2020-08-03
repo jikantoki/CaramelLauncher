@@ -1,0 +1,81 @@
+#!/bin/bash
+zenity --warning --title="重要" --window-icon="/usr/Caramel/logo/logow.png" --width=430 --text="アップデートを実行します。
+途中でキャンセルすると、その後の処理にエラーが出る場合があります。
+余程の事がない限りは、中断しないでください。
+アップデートの実行には、インターネット接続が必要です。
+必ずsudoを実行できるユーザーが行ってください。
+バツボタンでキャンセルできます。"
+if [ "x$?" = "x0" ];then #罰を押したらキャンセルできる
+	updo=$(zenity --list --window-icon="/usr/Caramel/logo/logow.png" --height=250 --text="オプションを選択してください。
+何も選択しない場合は、pingを実行して終了します。" --title="インストールオプション" --column="リスト" "Caramel OSとaptのアップデート" "aptのみのアップデート" "Caramel OSのみのアップデート")
+	if [ "x$?" = "x1" ];then
+		zenity --info --width=300 --window-icon="/usr/Caramel/logo/logow.png" --title="キャンセル" --text="アップデートがキャンセルされました。"
+		exit
+	else
+	ping -c 2 caramelos.xyz
+	if [ "x$?" = "x0" ];then
+		(
+		echo "5" ; sleep 1
+		pass=$(zenity --password --window-icon="/usr/Caramel/logo/logow.png" --title="認証が必要です" --text="ユーザーのパスワードを入力してください。")
+		echo "10" ; sleep 1
+		while true;
+		do
+			echo "# アップデートが可能なパッケージを探しています…"
+			hoge=$(echo $pass | sudo -S apt-get update)
+			hoge=$(echo "update ok!")
+			if [ "x$?" = "x1" ];then
+				pass=$(zenity --password --window-icon="/usr/Caramel/logo/logow.png" --title="パスワードが違います" --text="ユーザーのパスワードを入力してください。")
+			else
+				break;
+			fi
+		done
+		echo "30"
+		
+		if [ "x$updo" = "xCaramel OSとaptのアップデート" -o "x$updo" = "xaptのみのアップデート" ];then
+			echo "# メインシステムのアップデートを実行しています…"
+			hoge=$(echo $pass | sudo -S apt-get upgrade -y)
+			echo "65"
+		fi
+		
+		if [ "x$updo" = "xCaramel OSとaptのアップデート" -o "x$updo" = "xCaramel OSのみのアップデート" ];then
+			while true;
+			do
+				echo "# Caramelのアップデートを探しています…"
+				nextv=$(</usr/Caramel/system/nextversionis)
+				url=$(printf "https://repo.caramelos.xyz/update/caramel/%d.zip" $nextv)
+				status=`curl -sS -w '%{http_code}\n' "$url" -o /dev/null`
+				if [ $status -gt 399 ];then
+					echo "Update not found!"
+					break
+				else
+					echo "70"
+					echo "# Caramelのアップデートを実行しています…"
+					zipname=$(printf "/usr/Caramel/system/tmp/update/%d.zip" $nextv)
+					cd "/usr/Caramel/system/tmp/update"
+					wget -P "/usr/Caramel/system/tmp/update" "$url"
+					username=$(whoami)
+					hoge=$(echo $pass | sudo -S mkdir /usr/Caramel/system/tmp/update/file)
+					hoge=$(echo $pass | sudo -S unzip "$zipname" -d "/usr/Caramel/system/tmp/update/file")
+					hoge=$(echo $pass | sudo -S chmod 755 -R "/usr/Caramel/system/tmp/update/file")
+					hoge=$(echo $pass | sudo -S cp -rp /bin/update/todo)
+					hoge=$(echo $pass | sudo -S cp -rp /usr/Caramel/system/tmp/update/file/* /)
+					hoge=$(echo $pass | sudo -S chown "$username" -R /usr/Caramel/system/tmp/update/file/etc/skel/*)
+					hoge=$(echo $pass | sudo -S cp -rp /usr/Caramel/system/tmp/update/file/etc/skel/* ~/)
+					hoge=$(echo $pass | sudo -S chown root:root -R /etc/skel/)
+					hoge=$(echo $pass | sudo -S rm -rf /usr/Caramel/system/tmp/update/)
+				fi
+			done
+		fi
+		echo "90"
+		echo "# もうしばらくお待ちください…" ; sleep 1
+		notify-send -u critical "Caramel Launcher" "アップデートが完了しました。"
+		echo "100"
+		) |
+		upstart=$(zenity --window-icon="/usr/Caramel/logo/logow.png" --progress --width=450 --auto-close --auto-close --time-remaining= --title="アップデート実行中" --text="アップデートができるソフトウェアを探しています…")
+		zenity --info --width=300 --window-icon="/usr/Caramel/logo/logow.png" --title="完了" --text="アップデートが完了しました。"
+	else
+		zenity --warning --width=300 --window-icon="/usr/Caramel/logo/logow.png" --title="オフラインです" --text="ネットワークにアクセスできません。"
+	fi
+else
+	zenity --info --width=300 --window-icon="/usr/Caramel/logo/logow.png" --title="キャンセル" --text="アップデートがキャンセルされました。"
+fi
